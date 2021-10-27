@@ -52,7 +52,16 @@ async def list_clients(request):
 			client_list[iout][group_name].append({"name":port.name,"short_name":port.shortname,"connected_to":[con_port.name for con_port in jack_cli.get_all_connections(port)]})
 
 
-	return web.json_response(client_list)
+	out_keys=list(client_list["outputs"].keys())
+	out_keys.sort()
+
+	in_keys=list(client_list["inputs"].keys())
+	in_keys.sort()
+
+	return web.json_response({
+		"inputs":[{"group_name":k,"ports":client_list["inputs"][k]} for k in in_keys],
+		"outputs":[{"group_name":k,"ports":client_list["outputs"][k]} for k in out_keys],
+	})
 
 @routes.get('/flat_list_clients/{filter}')
 @routes.get('/flat_list_clients')
@@ -61,7 +70,11 @@ async def list_clients(request):
 		v_filter=request.match_info['filter']
 	except KeyError as e:
 		v_filter=None
-	return web.json_response([port.name for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi")])
+	in_ports=[{"name":port.name,"short_name":port.shortname} for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi",is_input=True)]
+	out_ports=[{"name":port.name,"short_name":port.shortname, "connected_to":[con_port.name for con_port in jack_cli.get_all_connections(port)]} for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi",is_output=True)]
+	in_ports.sort(key=lambda a: a["short_name"])
+	out_ports.sort(key=lambda a: a["short_name"])
+	return web.json_response({"inputs":in_ports,"outputs":out_ports})
 
 @routes.get('/')
 async def index(request):

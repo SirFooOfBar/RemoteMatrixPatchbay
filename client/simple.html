@@ -32,23 +32,22 @@ function generate_table(data,table)
 {
 	console.log(data);
 	html=`<tr><td>simple <a href="advance.html">advance</a> <a href="midi.html">midi</a></td>`
-	for(input in data.inputs)
+	for(input of data.inputs)
 	{
-		html+=`<td>${input}</td>`
+		html+=`<td>${input.group_name}</td>`
 	}
 	html+=`</tr>`
 
-	for(output in data.outputs)
+	for(output of data.outputs)
 	{
 		html+=`<tr>`
-		html+=`<td>${output}</td>`
-		for(input in data.inputs)
+		html+=`<td>${output.group_name}</td>`
+		for(input of data.inputs)
 		{
-			v_out=data.outputs[output],v_in=data.inputs[input]
-			checked=any_contains(v_out,v_in)?"checked":""
-			shortest=v_out.length<v_in.length?v_out.length:v_in.length
+			checked=any_contains(output.ports,input.ports)?"checked":""
+			shortest=output.ports.length<input.ports.length?output.ports.length:input.ports.length
 			connections=[]
-			for(j=0; j<shortest; j++) connections.push([v_out[j].name,v_in[j].name])
+			for(j=0; j<shortest; j++) connections.push([output.ports[j].name,input.ports[j].name])
 			connections=JSON.stringify(connections)
 			html+=`<td><input type="checkbox" ${checked} onclick="connect_disconnect(this)"></input>`
 			html+=`<span hidden=\"true\">${connections}</span></td>`

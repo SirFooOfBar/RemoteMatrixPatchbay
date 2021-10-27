@@ -26,23 +26,23 @@ function generate_table(data,table)
 {
 	console.log(data);
 	html=`<tr><td><a href="simple.html">simple</a> advance <a href="midi.html">midi</a></td>`
-	for(input in data.inputs)
+	for(input of data.inputs)
 	{
-		html+=`<td>${input}</td>`
+		html+=`<td>${input.group_name}</td>`
 	}
 	html+=`</tr>`
 
-	for(output in data.outputs)
+	for(output of data.outputs)
 	{
 		html+=`<tr>`
-		html+=`<td>${output}</td>`
-		for(input in data.inputs)
+		html+=`<td>${output.group_name}</td>`
+		for(input of data.inputs)
 		{
 			html+=`<td><table>`
-			for(out_port of data.outputs[output])
+			for(out_port of output.ports)
 			{
 				html+=`<tr>`
-				for(in_port of data.inputs[input])
+				for(in_port of input.ports)
 				{
 					checked=out_port.connected_to.includes(in_port.name)?"checked":""
 					

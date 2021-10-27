@@ -1,7 +1,7 @@
 <html><body>
 <link rel="stylesheet" href="style.css">
 <script>
-fetch("list_clients/midi").then(response => response.json()).then(data => generate_midi_table(data,"midi_table"));
+fetch("flat_list_clients/midi").then(response => response.json()).then(data => generate_midi_table(data,"midi_table"));
 
 function any_contains(array1,array2)
 {
@@ -27,31 +27,24 @@ function generate_midi_table(data,table)
 	console.log(data.inputs);
 	html=`<tr><td><a href="simple.html">simple</a> <a href="advance.html">advance</a> midi</td>`
 
-	for(input of data.inputs['Midi-Bridge'])
+	for(input of data.inputs)
 	{
 		html+=`<td>${input.short_name}</td>`
 	}
 	html+=`</tr>`
 
-	for(output in data.outputs)
+	for(output of data.outputs)
 	{
-		for(input in data.inputs)
+		html+=`<tr><td>${output.short_name}</td>`
+		for(input of data.inputs)
 		{
-			for(out_port of data.outputs[output])
-			{
-				html+=`<tr><td>${out_port.short_name}</td>`
-				for(in_port of data.inputs[input])
-				{
-					checked=out_port.connected_to.includes(in_port.name)?"checked":""
-					
-					html+=`<td>`
-					html+=`<input type="checkbox" ${checked} out_port="${out_port.name}" in_port="${in_port.name}" onclick="connect_disconnect(this)">`
-					//html+=`${out_port.short_name}:${in_port.short_name}`
-					html+=`</td>`
-				}
-				html+=`</tr>`
-			}
+			checked=output.connected_to.includes(input.name)?"checked":""
+				
+			html+=`<td>`
+			html+=`<input type="checkbox" ${checked} out_port="${output.name}" in_port="${input.name}" onclick="connect_disconnect(this)">`
+			html+=`</td>`
 		}
+		html+=`</tr>`
 	}
 
 	audio_table=document.getElementById(table);
