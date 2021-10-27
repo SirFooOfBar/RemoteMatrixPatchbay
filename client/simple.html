@@ -1,0 +1,65 @@
+<html><body>
+<link rel="stylesheet" href="style.css">
+<script>
+fetch("list_clients/audio").then(response => response.json()).then(data => generate_table(data,"audio_table"));
+
+function any_contains(output_ports,input_ports)
+{
+	for(o of output_ports)
+	{
+		for(i of input_ports) if(o.connected_to.includes(i.name))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+function connect_disconnect(box)
+{
+	action=!box.checked?"disconnect":"connect"
+	alpha = box
+	body_text=box.parentElement.getElementsByTagName("span")[0].innerText
+	params={
+		method: 'POST',
+		body: body_text,
+	}
+	
+	fetch(action,params).then(data => data.json()).then(data => console.log(data))
+}
+
+function generate_table(data,table)
+{
+	console.log(data);
+	html=`<tr><td>simple <a href="advance.html">advance</a> <a href="midi.html">midi</a></td>`
+	for(input in data.inputs)
+	{
+		html+=`<td>${input}</td>`
+	}
+	html+=`</tr>`
+
+	for(output in data.outputs)
+	{
+		html+=`<tr>`
+		html+=`<td>${output}</td>`
+		for(input in data.inputs)
+		{
+			v_out=data.outputs[output],v_in=data.inputs[input]
+			checked=any_contains(v_out,v_in)?"checked":""
+			shortest=v_out.length<v_in.length?v_out.length:v_in.length
+			connections=[]
+			for(j=0; j<shortest; j++) connections.push([v_out[j].name,v_in[j].name])
+			connections=JSON.stringify(connections)
+			html+=`<td><input type="checkbox" ${checked} onclick="connect_disconnect(this)"></input>`
+			html+=`<span hidden=\"true\">${connections}</span></td>`
+		}
+		html+=`</tr>`
+	}
+
+	audio_table=document.getElementById(table);
+	audio_table.innerHTML=html
+}
+</script>
+
+<table id="audio_table"></table>
+</body></html>

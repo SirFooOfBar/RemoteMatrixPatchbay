@@ -1,0 +1,67 @@
+<html><body>
+<link rel="stylesheet" href="style.css">
+<script>
+fetch("list_clients/audio").then(response => response.json()).then(data => generate_table(data,"audio_table"));
+
+function any_contains(array1,array2)
+{
+	for(a of array1) if(array2.contains(a)) return true;
+}
+
+function connect_disconnect(box)
+{
+	input=box.getAttribute("in_port")
+	output=box.getAttribute("out_port")
+	action=!box.checked?"disconnect":"connect"
+	alpha = box
+	params={
+		method: 'POST',
+		body: JSON.stringify([[output,input]])
+	}
+	
+	fetch(action,params).then(data => data.json()).then(data => console.log(data))
+}
+
+function generate_table(data,table)
+{
+	console.log(data);
+	html=`<tr><td><a href="simple.html">simple</a> advance <a href="midi.html">midi</a></td>`
+	for(input in data.inputs)
+	{
+		html+=`<td>${input}</td>`
+	}
+	html+=`</tr>`
+
+	for(output in data.outputs)
+	{
+		html+=`<tr>`
+		html+=`<td>${output}</td>`
+		for(input in data.inputs)
+		{
+			html+=`<td><table>`
+			for(out_port of data.outputs[output])
+			{
+				html+=`<tr>`
+				for(in_port of data.inputs[input])
+				{
+					checked=out_port.connected_to.includes(in_port.name)?"checked":""
+					
+					html+=`<td>`
+					html+=`<input type="checkbox" ${checked} out_port="${out_port.name}" in_port="${in_port.name}" onclick="connect_disconnect(this)">`
+					//html+=`${out_port.short_name}:${in_port.short_name}`
+					html+=`</td>`
+				}
+				html+=`</tr>`
+			}
+			html+=`</table></td>`
+		}
+		html+=`</tr>`
+	}
+
+	audio_table=document.getElementById(table);
+	audio_table.innerHTML=html
+}
+</script>
+
+<table id="audio_table"></table>
+</body></html>
