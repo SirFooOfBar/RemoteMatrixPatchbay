@@ -5,4 +5,4 @@ I recently switched to pipewire and wanted a better way to manage connections be
 Install python3, python-aiohttp and python-jack from your package manager of choice. Then run `./main.py`, connect to localhost:8096 and it's off to the races. Alternatively you can install jack and aiohttp from pip with pip install -r requirements.txt
 
 # Connecting remotely
-run `HTTP_HOST=0.0.0.0 ./main.py` or `HTTP_HOST=:: ./main.py` to expose to your network. Security is not a concern, and to control access, please do so using nginx or whatever external tool suits you best.
+run `HTTP_HOST=0.0.0.0 ./main.py` or `HTTP_HOST=:: ./main.py` to expose to your network. Security is not builtin, and to control access, please do so using nginx or whatever external tool suits you best.
