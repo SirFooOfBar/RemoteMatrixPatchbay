@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 from aiohttp import web
+from os import environ
 import jack
 
 jack_cli=jack.Client("web_controller")
 routes = web.RouteTableDef()
+
+http_host=environ.get("HTTP_HOST") or "localhost"
+http_port=environ.get("HTTP_PORT") or 8096
 
 def get_group(port):
 	len1=len(port.name)
@@ -83,4 +87,4 @@ async def index(request):
 routes.static("/","client")
 app = web.Application()
 app.add_routes(routes)
-web.run_app(app)
+web.run_app(app,host=http_host,port=http_port)
