@@ -17,9 +17,13 @@ function any_contains(output_ports,input_ports)
 
 function connect_disconnect(box)
 {
-	action=!box.checked?"disconnect":"connect"
-	alpha = box
-	body_text=box.parentElement.getElementsByTagName("span")[0].innerText
+	if(!box.checked){
+		action="disconnect"
+		body_text=box.parentElement.getElementsByTagName("span")[1].innerText
+	} else {
+		action="connect"
+		body_text=box.parentElement.getElementsByTagName("span")[0].innerText
+	}
 	params={
 		method: 'POST',
 		body: body_text,
@@ -45,12 +49,20 @@ function generate_table(data,table)
 		for(input of data.inputs)
 		{
 			checked=any_contains(output.ports,input.ports)?"checked":""
+
 			shortest=output.ports.length<input.ports.length?output.ports.length:input.ports.length
-			connections=[]
-			for(j=0; j<shortest; j++) connections.push([output.ports[j].name,input.ports[j].name])
-			connections=JSON.stringify(connections)
+			future_connections=[]
+			for(j=0; j<shortest; j++) future_connections.push([output.ports[j].name,input.ports[j].name])
+			future_connections=JSON.stringify(future_connections)
+
+			current_connections=[]
+			for(o of output.ports) for(ct of o.connected_to) current_connections.push([o.name,ct])
+			current_connections=JSON.stringify(current_connections)
+
 			html+=`<td><input type="checkbox" ${checked} onclick="connect_disconnect(this)"></input>`
-			html+=`<span hidden=\"true\">${connections}</span></td>`
+			html+=`<span hidden=\"true\">${future_connections}</span>`
+			html+=`<span hidden=\"true\">${current_connections}</span>`
+			html+=`</td>`
 		}
 		html+=`</tr>`
 	}

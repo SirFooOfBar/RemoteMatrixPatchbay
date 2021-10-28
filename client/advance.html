@@ -38,10 +38,18 @@ function generate_table(data,table)
 		html+=`<td>${output.group_name}</td>`
 		for(input of data.inputs)
 		{
-			html+=`<td><table>`
+			html+=`<td><table><tr><td></td>`
+
+			for(in_port of input.ports)
+			{
+				html+=`<td>${in_port.short_name}</td>`
+			}
+			html+=`</tr>`
+
 			for(out_port of output.ports)
 			{
 				html+=`<tr>`
+				html+=`<td>${out_port.short_name}</td>`
 				for(in_port of input.ports)
 				{
 					checked=out_port.connected_to.includes(in_port.name)?"checked":""
