@@ -29,7 +29,7 @@ function connect_disconnect(box)
 		body: body_text,
 	}
 	
-	fetch(action,params).then(data => data.json()).then(data => console.log(data))
+	fetch(action,params).then(data => data.json()).then(data => console.log(data)).then(location.reload());
 }
 
 function generate_table(data,table)
