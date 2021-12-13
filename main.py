@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 from aiohttp import web
 from os import environ
-import jack
+from configuration import hidden_ports
+import jack, re
 
 jack_cli=jack.Client("web_controller")
 routes = web.RouteTableDef()
@@ -13,6 +14,15 @@ def get_group(port):
 	len1=len(port.name)
 	len2=len(port.shortname)
 	return port.name[:len1-len2-1]
+
+def match_any(s: str, *patterns):
+	for pattern in patterns:
+		if re.search(pattern,s):
+			return True
+	return False
+
+def get_ports(v_filter):
+	return [port for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi") if not match_any(port.name,*hidden_ports) ]
 
 @routes.post('/connect')
 async def jack_connect(request):
@@ -43,7 +53,7 @@ async def list_clients(request):
 	except KeyError as e:
 		v_filter=None
 	client_list={"inputs":{},"outputs":{}}
-	for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi"):
+	for port in get_ports(v_filter):
 		group_name=get_group(port)
 		iout = "inputs" if port.is_input else "outputs" if port.is_output else None
 
@@ -74,8 +84,8 @@ async def list_clients(request):
 		v_filter=request.match_info['filter']
 	except KeyError as e:
 		v_filter=None
-	in_ports=[{"name":port.name,"short_name":port.shortname} for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi",is_input=True)]
-	out_ports=[{"name":port.name,"short_name":port.shortname, "connected_to":[con_port.name for con_port in jack_cli.get_all_connections(port)]} for port in jack_cli.get_ports(is_audio=v_filter=="audio",is_midi=v_filter=="midi",is_output=True)]
+	in_ports=[{"name":port.name,"short_name":port.shortname} for port in get_ports(v_filter) if port.is_input]
+	out_ports=[{"name":port.name,"short_name":port.shortname, "connected_to":[con_port.name for con_port in jack_cli.get_all_connections(port)]} for port in get_ports(v_filter) if port.is_output]
 	in_ports.sort(key=lambda a: a["short_name"])
 	out_ports.sort(key=lambda a: a["short_name"])
 	return web.json_response({"inputs":in_ports,"outputs":out_ports})
