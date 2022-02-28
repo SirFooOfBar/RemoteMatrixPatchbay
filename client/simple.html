@@ -19,7 +19,7 @@ function connect_disconnect(box)
 {
 	if(!box.checked){
 		action="disconnect"
-		body_text=box.parentElement.getElementsByTagName("span")[1].innerText
+		body_text=box.parentElement.getElementsByTagName("span")[0].innerText
 	} else {
 		action="connect"
 		body_text=box.parentElement.getElementsByTagName("span")[0].innerText
