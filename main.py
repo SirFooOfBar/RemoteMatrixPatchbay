@@ -10,9 +10,16 @@ routes = web.RouteTableDef()
 http_host=environ.get("HTTP_HOST") or "localhost"
 http_port=environ.get("HTTP_PORT") or 8096
 
-def get_group(port):
+def get_shortname(port):
+	index=port.name.rindex(":")
+	return port.name[index+1:]
+
+def get_group(port, shortname=None):
+	if not shortname:
+		shortname=get_shortname(port)
+
 	len1=len(port.name)
-	len2=len(port.shortname)
+	len2=len(shortname)
 	return port.name[:len1-len2-1]
 
 def match_any(s: str, *patterns):
@@ -54,6 +61,7 @@ async def list_clients(request):
 		v_filter=None
 	client_list={"inputs":{},"outputs":{}}
 	for port in get_ports(v_filter):
+		shortname=get_shortname(port)
 		group_name=get_group(port)
 		iout = "inputs" if port.is_input else "outputs" if port.is_output else None
 
@@ -61,9 +69,9 @@ async def list_clients(request):
 			client_list[iout][group_name]=[]
 
 		if iout=="inputs":
-			client_list[iout][group_name].append({"name":port.name,"short_name":port.shortname})
+			client_list[iout][group_name].append({"name":port.name,"short_name":shortname})
 		else:
-			client_list[iout][group_name].append({"name":port.name,"short_name":port.shortname,"connected_to":[con_port.name for con_port in jack_cli.get_all_connections(port)]})
+			client_list[iout][group_name].append({"name":port.name,"short_name":shortname,"connected_to":[con_port.name for con_port in jack_cli.get_all_connections(port)]})
 
 
 	out_keys=list(client_list["outputs"].keys())
